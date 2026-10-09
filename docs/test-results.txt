@@ -1,0 +1,7 @@
+Final verification command: python -m pytest -q
+Working directory: personal-agent-workbench
+Python: 3.12 (Linux host)
+.................................. [100%]
+34 passed in 2.82s
+
+HTTP completion tests use MockTransport. No authenticated live inference was performed.

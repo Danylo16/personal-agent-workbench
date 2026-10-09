@@ -1,0 +1,109 @@
+flowchart TB
+subgraph PH1["01 / Anfrage und Berechtigung"]
+direction TB
+A["START · Adressänderung anfragen / Kunde → Plattform: Bestellnummer und neue Adresse"]
+B["Anfrage registrieren / Idempotenzschlüssel; Duplikat → bisherigen Status liefern"]
+C{"Bestellung im OMS vorhanden? / Ohne Daten anderer Kunden offenzulegen"}
+D{"Identität und Rechte bestätigt? / Authentifizierte Sitzung / sichere Verifikation"}
+E{"Neue Adresse zulässig? / Format, Zustellgebiet, Steuern, Betrug / Mehrkosten"}
+F["OMS- und WMS-Status abrufen / Version, Label, Übergabe; Timeout → Support"]
+G{"Bereits an Carrier übergeben? / Status ist Momentaufnahme; auf Seite 2 erneut prüfen"}
+H["NEIN → Fortsetzung Seite 2 / Versand vor Änderung gegen Parallelzugriff sperren"]
+R1["Kein Auftrag / keine Rechte / Neutral informieren, auditieren; ENDE ohne Änderung"]
+R2["Regeln nicht erfüllt / Korrektur anfordern oder Support; keine Zusage"]
+R3["Unklarer Systemstatus / Supportfall; Kunde erhält Zwischenmeldung"]
+R4["JA → Seite 3 / Nur bestätigte Carrier-Umleitung prüfen"]
+A --> B
+B --> C
+C -->|"Ja"| D
+C -->|"Nein"| R1
+D -->|"Ja"| E
+D -->|"Nein"| R1
+E -->|"Ja"| F
+E -->|"Nein"| R2
+F -->|"OK"| G
+F -->|"Fehler"| R3
+G -->|"Nein"| H
+G -->|"Ja"| R4
+end
+subgraph PH2["02 / Vor Versand: sicher synchronisieren"]
+direction TB
+I["WMS-Hold atomar anfordern / Mit Version/Status-Bedingung; Label/Übergabe sperren"]
+J{"WMS bestätigt sichere Sperre? / Auch Label-Neudruck und ausstehende Jobs absichern"}
+K["Status + Version erneut prüfen / OMS/WMS-Abgleich unter Hold; stale → nicht schreiben"]
+L["OMS bedingt aktualisieren / Compare-and-swap + Outbox + Audit in einer Transaktion"]
+M["WMS / Plattform synchronisieren / Idempotent auf neue Version; alte Label invalidieren"]
+N{"Alle nötigen Bestätigungen da? / Adresse, Version und Label prüfen; HTTP 200 allein reicht nicht"}
+O["Hold kontrolliert freigeben / Nur neue Version darf Label / Übergabe erzeugen"]
+P["ERFOLG · Kunde informieren / Bestätigte Adresse + Audit; Benachrichtigung idempotent"]
+S1["Hold abgelehnt / Versand läuft / Kein blindes Update; Übergabe → S. 3, sonst Support"]
+S2["Konflikt / unklare Antwort / Hold-Status klären; Support übernimmt Abgleich"]
+S3["Fehler / Timeout / Teilzustand / Hold behalten bzw. Versand stoppen; Support abgleichen"]
+S4["Weiter unklar → Support / Kunde: „in Prüfung“; kein Erfolg bis Abgleich bestätigt"]
+I --> J
+J -->|"Ja"| K
+J -->|"Nein"| S1
+K -->|"Gültig"| L
+K -->|"Konflikt"| S2
+L -->|"Commit"| M
+L -->|"Fehler"| S2
+M --> N
+N -->|"Ja"| O
+N -->|"Nein"| S3
+S3 -->|"Keine Klärung"| S4
+O -->|"Bestätigt"| P
+O -->|"Fehler"| S4
+end
+subgraph PH3["03 / Nach Übergabe und manuelle Fälle"]
+direction TB
+T["Carrier-Umleitung anfragen / Nur unterstützte Änderungen; Anfrage idempotent referenzieren"]
+U{"Carrier bestätigt neue Zieladresse? / Kein Erfolg bei „angenommen“ oder ausstehender Prüfung"}
+V["Bestätigung im OMS dokumentieren / Umleitung separat speichern; alte Versandhistorie erhalten"]
+W["ERFOLG · Kunde benachrichtigen / Bestätigte Umleitung + Einschränkungen; Audit abschließen"]
+X["Support: Zustand rekonstruieren / OMS, WMS, Carrier abgleichen; Versand / Gebühren klären"]
+Y{"Sichere Lösung möglich? / Kein Rollback ohne Prüfung des realen Versandzustands"}
+Z["Manuell lösen + prüfen + melden / Bestätigte Lösung oder begründete Ablehnung; Audit; ENDE"]
+T1["Abgelehnt / nicht möglich / Support: Alternativen, Rücksendung oder Neubestellung"]
+T2["Timeout / noch ausstehend / Statusabgleich / verifizierter Webhook; Zwischenmeldung"]
+T3["Ausnahmefälle von Seite 1/2 / Kein automatisches Erfolgsversprechen"]
+T --> U
+U -->|"Ja"| V
+U -->|"Nein"| T1
+U -->|"Unklar"| T2
+T2 -->|"Ungeklärt"| X
+T1 --> X
+V -->|"Gespeichert"| W
+V -->|"Fehler"| X
+T3 --> X
+X --> Y
+Y -->|"Ja / Nein"| Z
+end
+H --> I
+R4 --> T
+R2 --> X
+R3 --> X
+S1 --> X
+S2 --> X
+S4 --> X
+classDef automatic fill:#eef4fc,stroke:#9baec6
+classDef human fill:#fff0dd,stroke:#d8a761
+class B automatic
+class F automatic
+class R1 human
+class R2 human
+class R3 human
+class I automatic
+class K automatic
+class L automatic
+class M automatic
+class O automatic
+class S1 human
+class S2 human
+class S3 human
+class S4 human
+class T automatic
+class V automatic
+class X human
+class Z human
+class T1 human
+class T2 human

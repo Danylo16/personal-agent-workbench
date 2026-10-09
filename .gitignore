@@ -1,0 +1,25 @@
+.env
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
+exports/
+
+# Private recording and submission materials
+docs/submission_email_de.txt
+docs/submission_checklist.md
+docs/loom_script_de.md
+docs/captions_de.srt
+*.bundle
+
+# Local archives and execution exports
+*.zip
+*.bundle
+run-*.json
+JSON_FIX_README.md
+
+# Recording and submission drafts
+docs/captions_de.srt
+docs/loom_script_de.md
+docs/submission_checklist.md
+docs/submission_email_de.txt

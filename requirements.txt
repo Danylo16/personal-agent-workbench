@@ -1,0 +1,6 @@
+streamlit>=1.45,<2
+httpx[socks]>=0.28,<1
+pydantic>=2.10,<3
+python-dotenv>=1.0,<2
+pytest>=8,<10
+pytest-asyncio>=0.25,<2
