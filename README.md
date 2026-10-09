@@ -1,7 +1,7 @@
 # Personal Agent Workbench
 
 Python 3.12+ / Streamlit / asyncio / HTTPX / Pydantic v2.
-A local four-agent engineering assistant that develops a personal GPT–Claude council approach into an explicit, inspectable Python workflow.
+A runnable four-agent technical investigation pipeline. New assessment implementation, evolving a prior user-configured Claude–GPT conference; historical dates and usage remain to be supplied.
 
 ## Windows PowerShell — install and run
 
@@ -21,7 +21,7 @@ Using the venv executable directly avoids PowerShell activation policy problems.
 ## API setup (€0 target)
 
 1. Create a free [OpenRouter](https://openrouter.ai/) account and API key in its dashboard. No key is bundled; paste it ONLY in local `.env` as `OPENROUTER_API_KEY=...`.
-2. Use `OpenRouter` mode. The default is `nvidia/nemotron-3-super-120b-a12b:free`, used in a completed four-stage run on 2026-10-09. Select an endpoint supporting structured outputs. Availability can change; roles may share one underlying model.
+2. Use `OpenRouter` mode. The default `openrouter/free` routes only to free models. It does not guarantee different underlying models for each agent.
 3. Press **Refresh current models** to fetch currently listed zero-price `:free` IDs. Assign them in **Agent Configuration**, then **Save configuration**. A catalogue listing is not a successful completion or a guarantee of capacity. The adapter blocks other IDs and sets zero prompt/completion price caps.
 4. For the first run use budget **4** (normally exactly four completion calls). If a transient error prevents completion, inspect the trace. A new deliberate run with budget **6** allows up to two additional requests, shared across all stages. Provider free quota is separate; the app cannot reset it.
 5. Free inference is often slow or rate limited. Do one genuine rehearsal before recording. Refresh is a separate model-list GET, not part of the four completion POSTs.
@@ -51,9 +51,9 @@ Select **Manual**, enter the problem, click **Start manual conference**. Copy th
 
 Do not use Offline mock as evidence of live AI. It is clearly labelled for tests/UI rehearsal. The failure toggle deliberately fails the reviewer; the judge must remain absent.
 
-## Documentation and process example
+## Assessment materials
 
-- `docs/historical_workflow.md`: personal workflow, reconstructed role prompts and a resolved PostgreSQL case.
+- `docs/historical_workflow.md`: fill genuine history, role prompts and excerpts; never backdate this build.
 - `docs/loom_script_de.md`: 4:45 screen recording storyboard, captions, optional narration.
 - `docs/captions_de.srt`: editable subtitle timing; replace historical placeholders before use.
 - `docs/submission_email_de.txt`: draft only, no email sent.
@@ -67,7 +67,7 @@ Do not use Offline mock as evidence of live AI. It is clearly labelled for tests
 
 ## Security and limitations
 
-The local server loads `.env`; no browser key input, no stored headers, no secrets in exports. Exports redact configured secrets/common key patterns, not arbitrary personal data. Inspect before sharing. Tasks and selected upstream results are sent to external providers; do not submit private code or customer data without authorization. Downloaded exports and browser session data are local to you; app does not store persistent run history. Optional supporting notes are session-only until exported.
+The local server loads `.env`; no browser key input, no stored headers, no secrets in exports. Exports redact configured secrets/common key patterns, not arbitrary personal data. Inspect before sharing. Tasks and selected upstream results are sent to external providers; do not submit private code or customer data without authorization. Downloaded exports and browser session data are local to you; app does not store persistent run history. Original Workflow text is session-only until exported.
 
 Agreement between agents is not correctness. The demo symptom is user-reported, not repository-verified. API provider capacity, Windows installation and silent Loom acceptance must be checked by the user. No voice/video recording or recruiter submission is performed by this package.
 
@@ -85,19 +85,3 @@ $env:DIAGRAM_FONT_BOLD = 'C:\Windows\Fonts\arialbd.ttf'
 ```
 
 These optional rendering dependencies are not required by the Streamlit app.
-
-## Repository setup
-
-From the project directory, with Git and GitHub CLI installed:
-
-```powershell
-git init -b main
-git add .
-git commit -m "Initial Personal Agent Workbench"
-gh auth login
-gh repo create personal-agent-workbench --private --source=. --remote=origin --push
-```
-
-The initial visibility is private. The ignore rules exclude credentials, local environments, exports and submission drafts. Review tracked files before changing visibility.
-
-Detailed implementation notes: `docs/architecture_details.md`.
